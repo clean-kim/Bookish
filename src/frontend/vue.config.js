@@ -2,6 +2,7 @@ const path = require('path')
 
 module.exports = {
     outputDir: path.resolve(__dirname, "../" + "main/resources/static"),
+
     devServer: {
         proxy: {
             '/test': {
@@ -10,5 +11,9 @@ module.exports = {
                 changeOrigin: true
             }
         }
-    }
+    },
+
+    transpileDependencies: [
+      'vuetify'
+    ]
 }
