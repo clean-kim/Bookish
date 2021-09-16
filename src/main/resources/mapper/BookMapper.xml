@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="kr.clean.bookish.vc.home.BookMapper">
+
+    <insert id="insertBook" parameterType="BookDetail">
+        INSERT IGNORE INTO book (
+            isbn
+            , title
+            , description
+            , author
+            , publisher
+            , image
+            , pubDate
+        )
+        VALUES (
+            #{isbn}
+            , #{title}
+            , #{description}
+            , #{author}
+            , #{publisher}
+            , #{image}
+            , #{pubDate}
+        )
+    </insert>
+
+    <select id="selectBook" resultType="BookDetail">
+        SELECT * FROM book
+    </select>
+
+</mapper>

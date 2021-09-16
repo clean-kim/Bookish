@@ -5,13 +5,21 @@ module.exports = {
 
     devServer: {
         proxy: {
-            '/test': {
+            '/home': {
                 target: 'http://localhost:8090',
                 ws: true,
                 changeOrigin: true
             }
         }
     },
+
+   /* css: {
+        loaderOptions: {
+            scss: {
+                prependData: ` @import "@/assets/scss/common.scss"; `,
+            },
+        },
+    },*/
 
     transpileDependencies: [
       'vuetify'

@@ -33,12 +33,15 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.0")
     implementation("org.jsoup:jsoup:1.12.1")
+    implementation("org.apache.commons:commons-lang3:3.8.1")
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
+    implementation("javax.xml.bind:jaxb-api")
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("mysql:mysql-connector-java")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    implementation("commons-io:commons-io:2.6")
 }
 
 
@@ -61,9 +64,8 @@ node {
     download = false
     workDir = file("./src/frontend")
     npmWorkDir = file("./src/frontend")
-    nodeModulesDir = file("./src/frontend")
+    nodeModulesDir = file("./src/frontend/node_modules")
 }
-
 
 val setup = task<NpmTask>("setup") {
     dependsOn("npmSetup")

@@ -1,7 +1,6 @@
-package kr.clean.bookish
+package kr.clean.bookish.util
 
 import kr.clean.bookish.model.BookDetail
-import kr.clean.bookish.vc.home.BookMapper
 import org.apache.http.HttpResponse
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.HttpGet
@@ -13,32 +12,14 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.parser.Parser
 import org.jsoup.select.Elements
-import org.junit.jupiter.api.Test
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.ApplicationContext
-import org.springframework.core.io.Resource
-import org.springframework.core.io.ResourceLoader
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
-@SpringBootTest
-class BookishApplicationTests {
+class OpenApiParsing {
 
     val log: Logger = LoggerFactory.getLogger(this.javaClass)
 
-    @Autowired
-    lateinit var bookMapper: BookMapper
-
-    @Test
-    fun contextLoads() {
-        val key = "9f318cfa6b9d91fc950d6c1feff5ac4219cb12bb9bf2a3b01f94432809134446"
-        val today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
-        val url = "https://nl.go.kr/NL/search/openApi/saseoApi.do?key=$key" +
-                "&startRowNumApi=1&endRowNumApi=10&start_date=$today&nd_date=$today&drcode=11"
+    fun xml(key: String, url: String): Document {
         log.debug("{}", url)
 
         val get = HttpGet(url)
@@ -49,7 +30,6 @@ class BookishApplicationTests {
             .build()
 
         val client : CloseableHttpClient = HttpClients.createDefault()
-
         val res: HttpResponse = client.execute(get)
         val contentType = ContentType.get(res.entity)
         val byteArray = EntityUtils.toByteArray(res.entity)
@@ -75,29 +55,10 @@ class BookishApplicationTests {
             doc = Jsoup.parse("<html></html>")
         }
 
-        val list: MutableList<BookDetail> = mutableListOf()
-        for(isbn in doc.select("recomisbn")) {
-            val book = BookDetail()
-            book.isbn = isbn.text()
-            list.add(book)
-        }
-
-        log.info("list >> $list")
+        return doc
     }
 
-    @Test
-    fun contextLoads2() {
-
-
-        /*
-       *url:'https://openapi.naver.com/v1/search/book.xml?query='+encodeURIComponent('타입스크립트')+'&display=10&start=1',
-       type:'GET',
-       headers: {'X-Naver-Client-Id':'SxxE9ZX8mhGHwE0khwl6','X-Naver-Client-Secret' :'XjkmirT8LN'}
-       * */
-
-        val clientId = "SxxE9ZX8mhGHwE0khwl6"
-        val clientSecret = "XjkmirT8LN"
-        val url = "https://openapi.naver.com/v1/search/book_adv.xml?d_isbn=9788961961844"
+    fun naverXml(clientId: String, clientSecret: String, url: String): BookDetail {
         log.debug("{}", url)
 
         val get = HttpGet(url)
@@ -117,8 +78,6 @@ class BookishApplicationTests {
 
         val charset = contentType.charset
         val responseString = String(byteArray, charset)
-
-        log.info("byteArray >> $byteArray")
 
         var parser: Parser? = null
         if (contentType.mimeType != null) {
@@ -141,10 +100,11 @@ class BookishApplicationTests {
         var book = BookDetail()
         if (el != null) {
             val isbn = el.select("isbn").text().split(" ")[1]
+            val image = el.select("image").text().replace("type=m1&", "")
             book = BookDetail(
                 title = el.select("title").text()
                 , description = el.select("description").text()
-                , image = el.select("image").text()
+                , image = image
                 , author = el.select("author").text()
                 , publisher = el.select("publisher").text()
                 , isbn = isbn
@@ -152,14 +112,6 @@ class BookishApplicationTests {
             )
         }
 
-         bookMapper.insertBook(book)
+        return book
     }
-
-    @Test
-    fun pathTest() {
-        val pathResolver = PathMatchingResourcePatternResolver()
-        log.info("path 2 >> ${pathResolver.getResources("classpath*:/**/*.xml").get(0)}")
-        log.info("path 3 >> ${pathResolver.getResources("classpath*:/kotlin/**/*.xml").size}")
-    }
-
 }

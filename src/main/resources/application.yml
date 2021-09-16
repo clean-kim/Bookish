@@ -1,0 +1,15 @@
+datasource:
+  db-lynn:
+    jdbcUrl: jdbc:mysql://localhost:3306/lynnsql?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    driverClassName: com.mysql.cj.jdbc.Driver
+    username: root
+    password: kclroot8798
+    minimumIdle: 1
+    idleTimeout: 10000
+    maximumPoolSize: 100
+    poolName: LynnDB
+server:
+  port: 8090
+
+
+
