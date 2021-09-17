@@ -1,5 +1,7 @@
 package kr.clean.bookish.util
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
 import kr.clean.bookish.model.BookDetail
 import org.apache.http.HttpResponse
 import org.apache.http.client.config.RequestConfig
@@ -8,18 +10,23 @@ import org.apache.http.entity.ContentType
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
+import org.json.JSONObject
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.parser.Parser
 import org.jsoup.select.Elements
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.util.stream.Collectors
+import kotlin.streams.toList
 
 class OpenApiParsing {
 
     val log: Logger = LoggerFactory.getLogger(this.javaClass)
 
-    fun xml(key: String, url: String): Document {
+    fun nlXml(url: String): Document {
         log.debug("{}", url)
 
         val get = HttpGet(url)
@@ -56,6 +63,34 @@ class OpenApiParsing {
         }
 
         return doc
+    }
+
+
+    fun nlJson(url: String): List<String> {
+        log.debug("{}", url)
+
+        val httpClient: CloseableHttpClient = HttpClients.createDefault()
+        val mapper = ObjectMapper()
+
+        val get = HttpGet(url)
+        val res = BufferedReader(
+            InputStreamReader(
+                httpClient.execute(get).entity.content
+            )
+        ).lines().collect(Collectors.joining())
+
+        val jsonObject = JSONObject(res)
+
+        val jsonList: List<Map<String, Any>> =
+            mapper.readValue(jsonObject.get("docs").toString(), object : TypeReference<List<Map<String, Any>>>() {})
+
+        val list = jsonList.stream()
+            .map { `val`: Map<String, Any> ->
+                `val`["EA_ISBN"].toString()
+            }
+            .toList()
+
+        return list
     }
 
     fun naverXml(clientId: String, clientSecret: String, url: String): BookDetail {

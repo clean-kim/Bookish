@@ -42,6 +42,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     implementation("commons-io:commons-io:2.6")
+    implementation("org.json:json:20190722")
 }
 
 

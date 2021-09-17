@@ -19,4 +19,16 @@ class BookController {
     fun recommend(): List<BookDetail> {
         return bookService.recommend()
     }
+
+    @GetMapping("/newBooks")
+    @ResponseBody
+    fun newBooks(): List<BookDetail> {
+        return bookService.newBooks()
+    }
+
+    @GetMapping("/search")
+    @ResponseBody
+    fun search(): List<BookDetail> {
+        return bookService.search()
+    }
 }

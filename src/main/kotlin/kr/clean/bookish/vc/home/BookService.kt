@@ -2,10 +2,6 @@ package kr.clean.bookish.vc.home
 
 import kr.clean.bookish.model.BookDetail
 import kr.clean.bookish.util.OpenApiParsing
-import org.apache.http.HttpResponse
-import org.apache.http.client.config.RequestConfig
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.entity.ContentType
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
@@ -45,7 +41,7 @@ class BookService {
         val url = "https://nl.go.kr/NL/search/openApi/saseoApi.do?key=$key" +
                 "&startRowNumApi=1&endRowNumApi=10&start_date=$today&nd_date=$today&drcode=11"
 
-        val doc = OpenApiParsing().xml(key, url)
+        val doc = OpenApiParsing().nlXml(url)
 
         val list: MutableList<BookDetail> = mutableListOf()
         for(isbn in doc.select("recomisbn")) {
@@ -71,6 +67,27 @@ class BookService {
         return book
     }
 
+    fun newBooks(): List<BookDetail> {
+        val list: MutableList<BookDetail> = mutableListOf()
+        nlNewBooks().forEach { isbn ->
+            list.add(naverBookDetails(isbn))
+        }
+        log.info("newBooksList >> $list")
+        return list
+    }
+
+    fun nlNewBooks(): List<String> {
+        val key = "9f318cfa6b9d91fc950d6c1feff5ac4219cb12bb9bf2a3b01f94432809134446"
+        val today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+        val url = "https://nl.go.kr/NL/search/openApi/saseoApi.do?key=$key" +
+                "&startRowNumApi=1&endRowNumApi=10&start_date=$today&nd_date=$today&drcode=11"
+
+        return OpenApiParsing().nlJson(url)
+    }
+
+    fun search(): List<BookDetail> {
+        return mutableListOf()
+    }
 
 
 }

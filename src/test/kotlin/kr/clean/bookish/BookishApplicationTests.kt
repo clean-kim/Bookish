@@ -1,5 +1,7 @@
 package kr.clean.bookish
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
 import kr.clean.bookish.model.BookDetail
 import kr.clean.bookish.vc.home.BookMapper
 import org.apache.http.HttpResponse
@@ -9,6 +11,7 @@ import org.apache.http.entity.ContentType
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
+import org.json.JSONObject
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.parser.Parser
@@ -18,12 +21,13 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.ApplicationContext
-import org.springframework.core.io.Resource
-import org.springframework.core.io.ResourceLoader
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.stream.Collectors
+
 
 @SpringBootTest
 class BookishApplicationTests {
@@ -162,4 +166,39 @@ class BookishApplicationTests {
         log.info("path 3 >> ${pathResolver.getResources("classpath*:/kotlin/**/*.xml").size}")
     }
 
+    @Test
+    fun contextLoads3() {
+        // http://seoji.nl.go.kr/landingPage/SearchApi.do?cert_key=[발급된키값]&result_style=json&page_no=1&page_size=10&start_publish_date=20170207&end_publish_date=20170207
+        val key = "9f318cfa6b9d91fc950d6c1feff5ac4219cb12bb9bf2a3b01f94432809134446"
+        val today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+        val month = LocalDate.now().minusMonths(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+        val url = "http://seoji.nl.go.kr/landingPage/SearchApi.do?cert_key=$key" +
+                "&result_style=json&page_no=1&page_size=10&start_publish_date=$month&end_publish_date=$today"
+        log.debug("{}", url)
+
+        val httpClient: CloseableHttpClient = HttpClients.createDefault()
+        val mapper = ObjectMapper()
+
+        val get = HttpGet(url)
+        val res = BufferedReader(
+            InputStreamReader(
+                httpClient.execute(get).entity.content
+            )
+        ).lines().collect(Collectors.joining())
+
+        val jsonObject = JSONObject(res)
+
+        val jsonList: List<Map<String, Any>> =
+            mapper.readValue(jsonObject.get("docs").toString(), object : TypeReference<List<Map<String, Any>>>() {})
+
+        val list = jsonList.stream()
+            .map { `val`: Map<String, Any> ->
+                `val`["EA_ISBN"]
+            }
+            .distinct()
+            .collect(Collectors.toList())
+
+        log.info("list >> $list")
+
+    }
 }
