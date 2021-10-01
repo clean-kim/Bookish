@@ -13,14 +13,6 @@ module.exports = {
         }
     },
 
-   /* css: {
-        loaderOptions: {
-            scss: {
-                prependData: ` @import "@/assets/scss/common.scss"; `,
-            },
-        },
-    },*/
-
     transpileDependencies: [
       'vuetify'
     ]

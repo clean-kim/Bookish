@@ -20,10 +20,10 @@ class BookController {
         return bookService.recommend()
     }
 
-    @GetMapping("/newBooks")
+    @GetMapping("/newest")
     @ResponseBody
-    fun newBooks(): List<BookDetail> {
-        return bookService.newBooks()
+    fun newest(): List<BookDetail> {
+        return bookService.newest()
     }
 
     @GetMapping("/search")

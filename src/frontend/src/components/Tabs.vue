@@ -55,7 +55,7 @@
 
 <script>
 export default {
-  name: "Tabs.vue",
+  name: "Tabs",
   data: () => ({
     tabs: null
   }),

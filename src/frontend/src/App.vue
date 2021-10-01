@@ -1,15 +1,11 @@
 <template>
-  <div id="App">
+  <div id="app">
     <Tabs></Tabs>
     <div style="margin: 10px;">
       <Ad></Ad>
     </div>
-    <!--
-<button type="button" class="v-btn v-btn--icon v-btn--round theme--light v-size--default"><span class="v-btn__content"><i aria-hidden="true" class="v-icon notranslate mdi mdi-bookmark theme--light"></i></span></button>
--->
-    <div style="margin: 10px;">
-      <Recommend></Recommend>
-    </div>
+    <Recommend></Recommend>
+    <Newest></Newest>
   </div>
 </template>
 
@@ -18,14 +14,16 @@
 import Ad from './components/Ad'
 import Tabs from './components/Tabs'
 import Recommend from './components/Recommend'
+import Newest from './components/Newest'
 
 export default {
-  name: 'App',
+  name: 'app',
 
   components: {
     Ad
     , Tabs
     , Recommend
+    , Newest
   },
 
 };

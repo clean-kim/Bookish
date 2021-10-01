@@ -5,19 +5,31 @@ import axios from "axios";
 Vue.use(Vuex)
 
 const storage = {
-    fetch() {
+    recommend() {
         const books = [];
         axios.get("/home/recommend")
             .then(res => {
                 res.data.forEach(item => books.push(item));
-                console.log(this.books);
             });
+
+        console.log(`recommend books >> ${books}`);
+        return books;
+    },
+    newest() {
+        const books = [];
+        axios.get("/home/newest")
+            .then(res => {
+                res.data.forEach(item => books.push(item));
+            });
+
+        console.log(`newest books >> ${books}`);
         return books;
     }
 }
 
 export const store = new Vuex.Store({
     state: {
-        books: storage.fetch()
+        books: storage.recommend(),
+        newest: storage.newest()
     }
 });

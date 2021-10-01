@@ -1,39 +1,35 @@
 <template>
-  <v-carousel v-model="model">
-    <v-carousel-item
-        v-for="(color, i) in colors"
-        :key="color"
-    >
-      <v-sheet
-          :color="color"
-          height="100%"
-          tile
+  <v-app>
+    <v-carousel>
+      <v-carousel-item
+          v-for="ad in images"
+          :key="ad"
       >
-        <v-row
-            class="fill-height"
-            align="center"
-            justify="center"
+        <v-sheet
+            height="100%"
+            tile
+            :style="{'background-image': 'url(' + ad + ')'}"
         >
-          <div class="text-h2">
-            Slide {{ i + 1 }}
-          </div>
-        </v-row>
-      </v-sheet>
-    </v-carousel-item>
-  </v-carousel>
+          <v-row
+              class="fill-height"
+              align="center"
+              justify="center"
+          >
+            <img :src="ad" alt="">
+          </v-row>
+        </v-sheet>
+      </v-carousel-item>
+    </v-carousel>
+  </v-app>
 </template>
 
 <script>
 export default {
   data: () => ({
-    model: 0,
-    colors: [
-      'primary',
-      'secondary',
-      'yellow darken-2',
-      'red',
-      'orange',
-    ],
+    images: [
+      require("../assets/images/ad1.png"),
+      require("../assets/images/ad2.png"),
+    ]
   }),
 }
 </script>

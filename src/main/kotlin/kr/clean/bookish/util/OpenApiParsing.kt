@@ -28,6 +28,7 @@ class OpenApiParsing {
 
     fun nlXml(url: String): Document {
         log.debug("{}", url)
+        log.info("{}", url)
 
         val get = HttpGet(url)
         get.config = RequestConfig.custom()
@@ -90,6 +91,7 @@ class OpenApiParsing {
             }
             .toList()
 
+        log.info("list >>> $list")
         return list
     }
 
@@ -107,44 +109,48 @@ class OpenApiParsing {
 
         val client : CloseableHttpClient = HttpClients.createDefault()
         val res: HttpResponse = client.execute(get)
-        val contentType = ContentType.get(res.entity)
-        val byteArray = EntityUtils.toByteArray(res.entity)
-        EntityUtils.consumeQuietly(res.entity)
 
-        val charset = contentType.charset
-        val responseString = String(byteArray, charset)
-
-        var parser: Parser? = null
-        if (contentType.mimeType != null) {
-            if (contentType.mimeType.lowercase().contains("xml")) {
-                parser = Parser.xmlParser()
-            } else {
-                parser = Parser.htmlParser()
-            }
-        }
-
-        var doc: Document
-        try {
-            doc = Jsoup.parse(responseString, url, parser)
-        } catch(e: Exception) {
-            log.error("URL 호출 및 파싱 오류", e)
-            doc = Jsoup.parse("<html></html>")
-        }
-
-        val el: Elements? = doc.select("item")
         var book = BookDetail()
-        if (el != null) {
-            val isbn = el.select("isbn").text().split(" ")[1]
-            val image = el.select("image").text().replace("type=m1&", "")
-            book = BookDetail(
-                title = el.select("title").text()
-                , description = el.select("description").text()
-                , image = image
-                , author = el.select("author").text()
-                , publisher = el.select("publisher").text()
-                , isbn = isbn
-                , pubDate = el.select("pubDate").text()
-            )
+        if (res.statusLine.statusCode == 200) {
+            val contentType = ContentType.get(res.entity)
+            val byteArray = EntityUtils.toByteArray(res.entity)
+            EntityUtils.consumeQuietly(res.entity)
+
+            val charset = contentType.charset
+            val responseString = String(byteArray, charset)
+
+            var parser: Parser? = null
+            if (contentType.mimeType != null) {
+                if (contentType.mimeType.lowercase().contains("xml")) {
+                    parser = Parser.xmlParser()
+                } else {
+                    parser = Parser.htmlParser()
+                }
+            }
+
+            var doc: Document
+            try {
+                doc = Jsoup.parse(responseString, url, parser)
+            } catch(e: Exception) {
+                log.error("URL 호출 및 파싱 오류", e)
+                doc = Jsoup.parse("<html></html>")
+            }
+
+            val el: Elements? = doc.select("item")
+            if (el != null && !el.isEmpty()) {
+                log.info("el >> $el")
+                val isbn = el.select("isbn").text().split(" ")[1]
+                val image = el.select("image").text().replace("type=m1&", "")
+                book = BookDetail(
+                    title = el.select("title").text()
+                    , description = el.select("description").text()
+                    , image = image
+                    , author = el.select("author").text()
+                    , publisher = el.select("publisher").text()
+                    , isbn = isbn
+                    , pubDate = el.select("pubDate").text()
+                )
+            }
         }
 
         return book
