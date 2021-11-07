@@ -9,5 +9,5 @@ import org.apache.ibatis.annotations.Mapper
 interface BookMapper {
 
     fun insertBook(book: BookDetail): Int
-    fun selectBook(): BookDetail
+    fun selectBook(isbn: String): BookDetail
 }

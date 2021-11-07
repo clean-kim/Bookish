@@ -25,6 +25,7 @@
 
     <select id="selectBook" resultType="BookDetail">
         SELECT * FROM book
+        WHERE isbn = #{isbn}
     </select>
 
 </mapper>

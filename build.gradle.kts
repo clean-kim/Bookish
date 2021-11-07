@@ -45,48 +45,13 @@ dependencies {
     implementation("org.json:json:20190722")
 }
 
-
-buildscript {
-    repositories {
-        maven {
-            url = uri("https://plugins.gradle.org/m2/")
+sourceSets {
+    main {
+        resources {
+            srcDir("$projectDir/src/main/kotlin")
         }
     }
-    dependencies {
-        classpath("com.github.node-gradle:gradle-node-plugin:2.2.3")
-    }
 }
-apply(plugin = "com.github.node-gradle.node")
-
-
-node {
-    version = "12.16.3"
-    npmVersion = "6.14.4"
-    download = false
-    workDir = file("./src/frontend")
-    npmWorkDir = file("./src/frontend")
-    nodeModulesDir = file("./src/frontend/node_modules")
-}
-
-val setup = task<NpmTask>("setup") {
-    dependsOn("npmSetup")
-    setArgs(listOf("install"))
-    inputs.dir("${project.projectDir}/src/frontend/node_modules")
-    inputs.file("${project.projectDir}/src/frontend/package.json")
-    outputs.upToDateWhen {
-        true
-    }
-}
-
-val buildVueTask = task<NpmTask>("buildNpm") {
-    dependsOn(setup)
-    setArgs(listOf("run", "build"))
-}
-
-tasks.bootJar {
-    dependsOn(buildVueTask)
-}
-
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
@@ -97,4 +62,23 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+val setup = task<NpmTask>("setup") {
+    setArgs(listOf("install"))
+    setExecOverrides(closureOf<ExecSpec> {
+        setWorkingDir(file("${project.projectDir}/src/frontend"))
+    })
+}
+
+val runBuildVue = task<NpmTask>("buildNpm") {
+    dependsOn(setup)
+    setArgs(listOf("run", "build"))
+    setExecOverrides(closureOf<ExecSpec> {
+        setWorkingDir(file("${project.projectDir}/src/frontend"))
+    })
+}
+
+tasks.bootJar {
+    dependsOn(runBuildVue)
 }

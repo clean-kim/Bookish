@@ -27,8 +27,8 @@
 export default {
   data: () => ({
     images: [
-      require("../assets/images/ad1.png"),
-      require("../assets/images/ad2.png"),
+      require("../../assets/images/ad1.png"),
+      require("../../assets/images/ad2.png"),
     ]
   }),
 }

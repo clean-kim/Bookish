@@ -1,7 +1,7 @@
 package kr.clean.bookish.model
 
 data class BookDetail(
-    val no: Int? = 0,
+    val no: Int? = null,
     var isbn: String? = null,
     var title: String? = null,
     val description: String? = null,

@@ -11,8 +11,6 @@ const storage = {
             .then(res => {
                 res.data.forEach(item => books.push(item));
             });
-
-        console.log(`recommend books >> ${books}`);
         return books;
     },
     newest() {
@@ -21,8 +19,6 @@ const storage = {
             .then(res => {
                 res.data.forEach(item => books.push(item));
             });
-
-        console.log(`newest books >> ${books}`);
         return books;
     }
 }
@@ -30,6 +26,15 @@ const storage = {
 export const store = new Vuex.Store({
     state: {
         books: storage.recommend(),
-        newest: storage.newest()
+        newest: storage.newest(),
+        bookDetail: storage.detail()
+    },
+    actions: {
+        detail(commit, isbn) {
+            let bookDetail = null;
+            axios.get("/detail", {params: {isbn: isbn}})
+                .then(res => bookDetail = res.data)
+            return bookDetail;
+        }
     }
 });
