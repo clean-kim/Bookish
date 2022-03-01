@@ -6,6 +6,7 @@ data class BookDetail(
     var title: String? = null,
     val description: String? = null,
     val author: String? = null,
+    val category: String? = null,
     val publisher: String? = null,
     val image: String? = null,
     val pubDate: String? = null

@@ -1,5 +1,6 @@
 package kr.clean.bookish.vc.home
 
+import kr.clean.bookish.model.Book
 import kr.clean.bookish.model.BookDetail
 import kr.clean.bookish.util.OpenApiParsing
 import org.apache.http.impl.client.CloseableHttpClient
@@ -25,11 +26,18 @@ class BookService {
     @Autowired
     lateinit var bookMapper: BookMapper
 
+
     fun recommend(): MutableList<BookDetail> {
         val bookList: MutableList<BookDetail> = mutableListOf()
         nlRecommend().forEach { it.isbn?.let { it1 ->
-            bookList.add(naverBookDetails(it1))
+            val existBook = bookMapper.selectBook(it1)
+            if(existBook != null) {
+                bookList.add(existBook)
+            } else {
+                bookList.add(naverBookDetails(it1))
+            }
         } }
+        log.info("bookList >> $bookList")
         return bookList
     }
 
@@ -48,7 +56,6 @@ class BookService {
             book.isbn = isbn.text()
             list.add(book)
         }
-
         return list
     }
 
@@ -67,18 +74,14 @@ class BookService {
         return book
     }
 
-    fun newest(): List<BookDetail> {
-        val list: MutableList<BookDetail> = mutableListOf()
-        nlNewBooks().forEach { isbn ->
-            list.add(naverBookDetails(isbn))
-        }
-        return list
+    fun newest(): List<Book> {
+        return bookMapper.selectBookList()
     }
 
     fun nlNewBooks(): List<String> {
         val key = "9f318cfa6b9d91fc950d6c1feff5ac4219cb12bb9bf2a3b01f94432809134446"
-        val startMonth = LocalDate.now().minusMonths(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"))
-        val endMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+        val startMonth = LocalDate.now().minusMonths(3).format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+        val endMonth = LocalDate.now().minusMonths(2).format(DateTimeFormatter.ofPattern("yyyyMMdd"))
         log.info("startMonth >> $startMonth , endMonth >> $endMonth")
         val url = "http://seoji.nl.go.kr/landingPage/SearchApi.do?cert_key=$key" +
                 "&result_style=json&page_no=1&page_size=10&start_publish_date=$startMonth&end_publish_date=$endMonth"

@@ -11,18 +11,17 @@ export default new VueRouter({
     routes: [
         {
             path: '/',
-            name: 'Home',
             component: Home
         },
         {
             path: '/home',
-            name: 'Home',
             component: Home
         },
         {
             path: '/detail',
             name: 'BookDetail',
-            component: BookDetail
+            component: BookDetail,
+            props: true
         }
     ]
 })

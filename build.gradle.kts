@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import  com.moowork.gradle.node.npm.NpmTask
 
 plugins {
     id("org.springframework.boot") version "2.5.4"
@@ -64,21 +63,24 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-val setup = task<NpmTask>("setup") {
+node {
+    download = true
+    version = "12.13.1"
+    npmVersion = "6.9.0"
+    yarnVersion = "1.17.3"
+    nodeModulesDir = project.file("$projectDir/src/frontend")
+    workDir = project.file("${project.buildDir}/nodejs")
+    npmWorkDir = project.file("${project.buildDir}/npm")
+    yarnWorkDir = project.file("${project.buildDir}/yarn")
+}
+
+task<com.moowork.gradle.node.npm.NpmTask>("installNpm") {
     setArgs(listOf("install"))
-    setExecOverrides(closureOf<ExecSpec> {
-        setWorkingDir(file("${project.projectDir}/src/frontend"))
-    })
 }
 
-val runBuildVue = task<NpmTask>("buildNpm") {
-    dependsOn(setup)
+task<com.moowork.gradle.node.npm.NpmTask>("buildVue") {
     setArgs(listOf("run", "build"))
-    setExecOverrides(closureOf<ExecSpec> {
-        setWorkingDir(file("${project.projectDir}/src/frontend"))
-    })
 }
 
-tasks.bootJar {
-    dependsOn(runBuildVue)
-}
+tasks.getByName("buildVue").dependsOn("installNpm")
+tasks.getByName("processResources").dependsOn("buildVue")

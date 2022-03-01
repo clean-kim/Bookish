@@ -8,6 +8,7 @@
             , title
             , description
             , author
+            , category
             , publisher
             , image
             , pubDate
@@ -17,6 +18,7 @@
             , #{title}
             , #{description}
             , #{author}
+            , #{category}
             , #{publisher}
             , #{image}
             , #{pubDate}
@@ -26,6 +28,10 @@
     <select id="selectBook" resultType="BookDetail">
         SELECT * FROM book
         WHERE isbn = #{isbn}
+    </select>
+
+    <select id="selectBookList" resultType="Book">
+        SELECT * FROM book ORDER BY rand() LIMIT 10
     </select>
 
 </mapper>

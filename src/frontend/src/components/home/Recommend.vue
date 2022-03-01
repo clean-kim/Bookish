@@ -1,23 +1,13 @@
 <template>
   <div id="recommend">
     <h3>사서 선생님이 추천한대요~🤓</h3>
-    <vue-glide
-        ref="slider"
-        v-bind="carouselOptions">
-      <vue-glide-slide
-          v-for="book in this.$store.state.books" :key="book.isbn" style="width: fit-content;">
+    <vue-glide ref="slider" type="carousel" v-if="books.length">
+      <vue-glide-slide v-for="(book, index) in books" :key="index" style="width: fit-content;">
         <router-link :to="'/detail/info?isbn='+book.isbn">
-          <v-card
-              class="ma-4"
-          >
-            <v-img
-                :src="book.image"
-                style="width: fit-content;"
-            ></v-img>
+          <v-card class="ma-4">
+            <img :src="book.image" style="width: 200px;" />
             <v-card-actions>
-              <div style="word-break: break-all;">
-                {{book.title}}
-              </div>
+              <div style="word-break: break-all;">{{book.title}}</div>
             </v-card-actions>
           </v-card>
         </router-link>
@@ -27,33 +17,21 @@
 </template>
 
 <script>
-import { Glide, GlideSlide } from "vue-glide-js";
-import "vue-glide-js/dist/vue-glide.css";
+import axios from "axios"
 
 export default {
   name: 'Recommend',
   data: () => ({
-    books: []
+    books: [],
   }),
   methods: {
   },
-  components: {
-    [Glide.name]: Glide,
-    [GlideSlide.name]: GlideSlide
-  },
-  computed: {
-    carouselOptions() {
-      return {
-        type: "carousel",
-        autoplay: 5000,
-        gap: 5,
-        hoverpause: true,
-        keyboard: false,
-        bound: false
-      }
-    }
+  created() {
+    axios.get("/home/recommend")
+        .then(res => {
+          res.data.forEach(item => this.books.push(item));
+        });
   }
-
 }
 </script>
 

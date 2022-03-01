@@ -24,8 +24,10 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.nio.charset.Charset
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.*
 import java.util.stream.Collectors
 
 
@@ -92,7 +94,6 @@ class BookishApplicationTests {
     @Test
     fun contextLoads2() {
 
-
         /*
        *url:'https://openapi.naver.com/v1/search/book.xml?query='+encodeURIComponent('타입스크립트')+'&display=10&start=1',
        type:'GET',
@@ -101,62 +102,75 @@ class BookishApplicationTests {
 
         val clientId = "SxxE9ZX8mhGHwE0khwl6"
         val clientSecret = "XjkmirT8LN"
-        val url = "https://openapi.naver.com/v1/search/book_adv.xml?d_isbn=9788961961844"
-        log.debug("{}", url)
 
-        val get = HttpGet(url)
-        get.config = RequestConfig.custom()
-            .setConnectTimeout(5000)
-            .setSocketTimeout(5000)
-            .setRedirectsEnabled(true)
-            .build()
-        get.addHeader("X-Naver-Client-Id", clientId)
-        get.addHeader("X-Naver-Client-Secret", clientSecret)
+        val isbnList = arrayOf(
+            "9791190299220",
+            "9791190224635")
 
-        val client : CloseableHttpClient = HttpClients.createDefault()
-        val res: HttpResponse = client.execute(get)
-        val contentType = ContentType.get(res.entity)
-        val byteArray = EntityUtils.toByteArray(res.entity)
-        EntityUtils.consumeQuietly(res.entity)
+        for(i in isbnList) {
+            val url = "https://openapi.naver.com/v1/search/book_adv.xml?d_isbn=" + i
+//          val url = "https://openapi.naver.com/v1/search/book_adv.xml?d_titl=사피엔스"
+            log.debug("{}", url)
 
-        val charset = contentType.charset
-        val responseString = String(byteArray, charset)
+            val get = HttpGet(url)
+            get.config = RequestConfig.custom()
+                .setConnectTimeout(5000)
+                .setSocketTimeout(5000)
+                .setRedirectsEnabled(true)
+                .build()
+            get.addHeader("X-Naver-Client-Id", clientId)
+            get.addHeader("X-Naver-Client-Secret", clientSecret)
 
-        log.info("byteArray >> $byteArray")
+            val client : CloseableHttpClient = HttpClients.createDefault()
+            val res: HttpResponse = client.execute(get)
+            val contentType = ContentType.get(res.entity)
+            val byteArray = EntityUtils.toByteArray(res.entity)
+            EntityUtils.consumeQuietly(res.entity)
 
-        var parser: Parser? = null
-        if (contentType.mimeType != null) {
-            if (contentType.mimeType.lowercase().contains("xml")) {
-                parser = Parser.xmlParser()
-            } else {
-                parser = Parser.htmlParser()
+            var charset = contentType.charset
+            if(charset == null){
+                charset = Charset.defaultCharset()
             }
+            val responseString = String(byteArray, charset)
+
+            var parser: Parser? = null
+            if (contentType.mimeType != null) {
+                if (contentType.mimeType.lowercase().contains("xml")) {
+                    parser = Parser.xmlParser()
+                } else {
+                    parser = Parser.htmlParser()
+                }
+            }
+
+            var doc: Document
+            try {
+                doc = Jsoup.parse(responseString, url, parser)
+            } catch(e: Exception) {
+                log.error("URL 호출 및 파싱 오류", e)
+                doc = Jsoup.parse("<html></html>")
+            }
+
+            log.info("doc >> $doc")
+
+            val el: Elements? = doc.select("item")
+            var book = BookDetail()
+            if (el != null) {
+                val isbn = el.select("isbn").text().split(" ")[1]
+                book = BookDetail(
+                    title = el.select("title").text().split('(')[0].trim()
+                    , description = el.select("description").text()
+                    , image = el.select("image").text()
+                    , author = el.select("author").text()
+                    , category = "CA05"
+                    , publisher = el.select("publisher").text()
+                    , isbn = isbn
+                    , pubDate = el.select("pubDate").text()
+                )
+            }
+
+            bookMapper.insertBook(book)
         }
 
-        var doc: Document
-        try {
-            doc = Jsoup.parse(responseString, url, parser)
-        } catch(e: Exception) {
-            log.error("URL 호출 및 파싱 오류", e)
-            doc = Jsoup.parse("<html></html>")
-        }
-
-        val el: Elements? = doc.select("item")
-        var book = BookDetail()
-        if (el != null) {
-            val isbn = el.select("isbn").text().split(" ")[1]
-            book = BookDetail(
-                title = el.select("title").text()
-                , description = el.select("description").text()
-                , image = el.select("image").text()
-                , author = el.select("author").text()
-                , publisher = el.select("publisher").text()
-                , isbn = isbn
-                , pubDate = el.select("pubDate").text()
-            )
-        }
-
-         bookMapper.insertBook(book)
     }
 
     @Test
@@ -201,4 +215,86 @@ class BookishApplicationTests {
 //        log.info("list >> $list")
 //
 //    }
+
+    @Test
+    fun crawlingTest() {
+        val url = "https://book.naver.com/bestsell/bestseller_list.naver?cp=kyobo"
+        val getHtml = HttpGet(url)
+
+        getHtml.config = RequestConfig.custom()
+                            .setConnectTimeout(5000)
+                            .setSocketTimeout(5000)
+                            .setRedirectsEnabled(true)
+                            .build()
+
+        val client : CloseableHttpClient = HttpClients.createDefault()
+        val res: HttpResponse = client.execute(getHtml)
+
+        if(res.statusLine.statusCode == 200) {
+            val contentType = ContentType.get(res.entity)
+            val byteArray = EntityUtils.toByteArray(res.entity)
+            EntityUtils.consumeQuietly(res.entity)
+
+            val charset = contentType.charset
+            val responseString = String(byteArray, charset)
+
+            var parser: Parser? = Parser.htmlParser()
+
+            var doc: Document
+            try {
+                doc = Jsoup.parse(responseString, url, parser)
+                log.info("doc >> $doc")
+            } catch(e: Exception) {
+                log.error("URL 호출 및 파싱 오류", e)
+                doc = Jsoup.parse("<html></html>")
+            }
+        }
+    }
+
+    @Test
+    fun searchTest() {
+        val clientId = "SxxE9ZX8mhGHwE0khwl6"
+        val clientSecret = "XjkmirT8LN"
+        val url = "https://openapi.naver.com/v1/search/book.xml?query=&display=10&start=1"
+        log.debug("{}", url)
+
+        val get = HttpGet(url)
+        get.config = RequestConfig.custom()
+            .setConnectTimeout(5000)
+            .setSocketTimeout(5000)
+            .setRedirectsEnabled(true)
+            .build()
+        get.addHeader("X-Naver-Client-Id", clientId)
+        get.addHeader("X-Naver-Client-Secret", clientSecret)
+
+        val client : CloseableHttpClient = HttpClients.createDefault()
+        val res: HttpResponse = client.execute(get)
+        val contentType = ContentType.get(res.entity)
+        val byteArray = EntityUtils.toByteArray(res.entity)
+        EntityUtils.consumeQuietly(res.entity)
+
+        val charset = contentType.charset
+        val responseString = String(byteArray, charset)
+
+        log.info("byteArray >> $byteArray")
+
+        var parser: Parser? = null
+        if (contentType.mimeType != null) {
+            if (contentType.mimeType.lowercase().contains("xml")) {
+                parser = Parser.xmlParser()
+            } else {
+                parser = Parser.htmlParser()
+            }
+        }
+
+        var doc: Document
+        try {
+            doc = Jsoup.parse(responseString, url, parser)
+        } catch(e: Exception) {
+            log.error("URL 호출 및 파싱 오류", e)
+            doc = Jsoup.parse("<html></html>")
+        }
+
+    }
+
 }

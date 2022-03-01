@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="app">
     <Tabs></Tabs>
     <div style="margin: 10px;">
       <Ad></Ad>

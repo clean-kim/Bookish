@@ -41,7 +41,7 @@ class MybatisApplicationConfig {
         sessionFactoryBean.setDataSource(dataSource)
         sessionFactoryBean.setTypeAliasesPackage("kr.clean.bookish.model")
         sessionFactoryBean.setConfigLocation(pathResolver.getResource("classpath:mybatis/MybatisConfiguration.xml"))
-        sessionFactoryBean.setMapperLocations(*pathResolver.getResources("classpath*:mapper/*Mapper.xml"))
+        sessionFactoryBean.setMapperLocations(*pathResolver.getResources("classpath*:**/*Mapper.xml"))
         val config = Objects.requireNonNull(sessionFactoryBean.getObject())!!.configuration
         if (config != null) {
             config.isUseGeneratedKeys = true

@@ -1,5 +1,6 @@
 package kr.clean.bookish.vc.home
 
+import kr.clean.bookish.model.Book
 import kr.clean.bookish.model.BookDetail
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
@@ -22,7 +23,7 @@ class BookController {
 
     @GetMapping("/newest")
     @ResponseBody
-    fun newest(): List<BookDetail> {
+    fun newest(): List<Book> {
         return bookService.newest()
     }
 

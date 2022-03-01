@@ -91,7 +91,7 @@ class OpenApiParsing {
             }
             .toList()
 
-        log.info("list >>> $list")
+        log.info("nljson list >>> $list")
         return list
     }
 
@@ -131,6 +131,7 @@ class OpenApiParsing {
             var doc: Document
             try {
                 doc = Jsoup.parse(responseString, url, parser)
+                log.info("doc >> $doc")
             } catch(e: Exception) {
                 log.error("URL 호출 및 파싱 오류", e)
                 doc = Jsoup.parse("<html></html>")
