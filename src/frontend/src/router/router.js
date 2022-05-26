@@ -3,7 +3,8 @@ import VueRouter from 'vue-router'
 
 import Home from '@/components/home/Home'
 import BookDetail from '@/components/detail/BookDetail'
-import Edit from "@/components/edit/Edit";
+import Edit from "@/components/edit/Edit"
+import Ui from "@/components/edit/Ui"
 
 Vue.use(VueRouter)
 
@@ -28,6 +29,11 @@ export default new VueRouter({
             path: '/edit',
             name: 'Edit',
             component: Edit
+        },
+        {
+            path: '/ui',
+            name: 'Ui',
+            component: Ui
         }
     ]
 })

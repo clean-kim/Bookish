@@ -1,6 +1,28 @@
+html {
+  font-family: Pretendard,-apple-system,돋움,Dotum,"Helvetica Neue",arial,sans-serif;
+  font-weight: 400;
+  letter-spacing: 0;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-size: 14px;
+  min-width: 320px;
+}
+
 h3 {
   color: #3e4857;
 }
+
+.p20 {
+  padding: 20px;
+}
+
+.d-flex {
+  display: flex;
+}
+
 
 
 /// 사용자 정의 변수

@@ -1,6 +1,8 @@
 <template>
   <div id="app">
-    <router-view style="width: 80%; margin: 58px auto 129px auto;" />
+    <Tabs></Tabs>
+<!--    <router-view style="width: 80%; margin: 58px auto 129px auto;" />-->
+    <router-view />
   </div>
 </template>
 
